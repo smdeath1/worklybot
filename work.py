@@ -346,7 +346,38 @@ async def handle_input(message: Message):
     except Exception as e:
         logger.error(f"Ошибка в handle_input: {e}")
         await message.answer("❌ Ошибка. Попробуйте позже.")
+@dp.message(Command("pay"))
+async def admin_confirm_payment(message: Message, command: CommandObject):
+    try:
+        if message.from_user.id != ADMIN_ID:
+            await message.answer("❌ У вас нет прав на эту команду.")
+            return
 
+        if not command.args:
+            await message.answer("❌ Использование: /pay <employer_code>")
+            return
+
+        employer_code = command.args.strip()
+
+        with sqlite3.connect("jobs.db", check_same_thread=False) as conn:
+            cur = conn.cursor()
+            # Проверяем есть ли такой работодатель
+            cur.execute("SELECT telegram_id FROM users WHERE employer_code = ?", (employer_code,))
+            row = cur.fetchone()
+            if not row:
+                await message.answer("❌ Работодатель не найден.")
+                return
+            # Обновляем подписку
+            cur.execute(
+                "UPDATE users SET subscription_active = 1, subscription_start = ? WHERE employer_code = ?",
+                (datetime.now().strftime("%Y-%m-%d"), employer_code)
+            )
+            conn.commit()
+
+        await message.answer(f"✅ Подписка для {employer_code} активирована.")
+    except Exception as e:
+        logger.error(f"Ошибка в admin_confirm_payment: {e}")
+        await message.answer("❌ Ошибка при подтверждении оплаты.")
 # Запуск бота
 if __name__ == "__main__":
     init_db()
