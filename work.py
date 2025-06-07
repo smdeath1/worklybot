@@ -347,7 +347,11 @@ async def handle_input(message: Message):
     except Exception as e:
         logger.error(f"Ошибка в handle_input: {e}")
         await message.answer("❌ Ошибка. Попробуйте позже.")
-
+# Команда для получения базы (для админа)
+@dp.message(Command("get_db"))
+async def get_db(message: Message):
+    if message.from_user.id == ADMIN_ID:
+        await message.answer_document(types.FSInputFile("jobs.db"))
 # Запуск бота
 if __name__ == "__main__":
     init_db()
