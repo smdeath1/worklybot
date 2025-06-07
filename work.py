@@ -6,7 +6,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from aiogram.filters import Command
+from aiogram.filters import CommandObject
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
