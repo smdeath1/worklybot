@@ -6,7 +6,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from aiogram.filters import CommandObject
+from aiogram.filters import Command
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -347,7 +347,7 @@ async def handle_input(message: Message):
         logger.error(f"Ошибка в handle_input: {e}")
         await message.answer("❌ Ошибка. Попробуйте позже.")
 @dp.message(Command("pay"))
-async def admin_confirm_payment(message: Message, command: CommandObject):
+async def admin_confirm_payment(message: Message, command: Command):
     try:
         if message.from_user.id != ADMIN_ID:
             await message.answer("❌ У вас нет прав на эту команду.")
