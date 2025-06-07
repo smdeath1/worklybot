@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.types import Message
+from aiogram.types import Message,FSInputFile
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.filters import Command
 
@@ -68,6 +68,17 @@ async def cmd_start(message: Message):
     kb.button(text="Я работодатель")
     kb.button(text="Ищу работу")
     await message.answer("👋 Привет! Выберите роль:", reply_markup=kb.as_markup(resize_keyboard=True))
+# /get_db
+@dp.message(Command("get_db"))
+async def get_db(message: Message):
+    if message.from_user.id == ADMIN_ID:
+        try:
+            db_file = FSInputFile("jobs.db")
+            await message.answer_document(db_file, caption="📎 Вот твоя база данных")
+        except Exception as e:
+            await message.answer(f"❌ Ошибка при отправке базы: {e}")
+    else:
+        await message.answer("⛔️ Только админ может получить базу данных.")    
 
 # Регистрация работодателя
 @dp.message(F.text == "Я работодатель")
@@ -347,11 +358,7 @@ async def handle_input(message: Message):
     except Exception as e:
         logger.error(f"Ошибка в handle_input: {e}")
         await message.answer("❌ Ошибка. Попробуйте позже.")
-# Команда для получения базы (для админа)
-@dp.message(Command("get_db"))
-async def get_db(message: Message):
-    if message.from_user.id == ADMIN_ID:
-        await message.answer_document(types.FSInputFile("jobs.db"))
+
 # Запуск бота
 if __name__ == "__main__":
     init_db()
