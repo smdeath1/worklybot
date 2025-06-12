@@ -118,16 +118,30 @@ async def check_payment(message: Message):
         cur.close()
         conn.close()
         if row and row[0] and row[1]:
-            start_date = datetime.strptime(row[1], "%Y-%m-%d")
-            if datetime.now() - start_date <= timedelta(days=30):
-                kb = ReplyKeyboardBuilder()
-                kb.button(text="Разместить вакансию")
-                kb.button(text="Мои вакансии")
-                kb.button(text="Подписка")
-                await message.answer("✅ Подписка активна!", reply_markup=kb.as_markup(resize_keyboard=True))
-                user_states[uid] = {"step": "employer_menu"}
-                return
-            await message.answer("❌ Оплата не подтверждена. Свяжитесь с админом.")
+            start_date = row[1]
+            # Проверяем, является ли start_date уже объектом datetime.date
+            if isinstance(start_date, datetime.date):
+                # Если это объект datetime.date, используем его напрямую
+                if datetime.now().date() - start_date <= timedelta(days=30):
+                    kb = ReplyKeyboardBuilder()
+                    kb.button(text="Разместить вакансию")
+                    kb.button(text="Мои вакансии")
+                    kb.button(text="Подписка")
+                    await message.answer("✅ Подписка активна!", reply_markup=kb.as_markup(resize_keyboard=True))
+                    user_states[uid] = {"step": "employer_menu"}
+                    return
+            else:
+                # Если это строка, парсим как раньше
+                start_date = datetime.strptime(start_date, "%Y-%m-%d")
+                if datetime.now() - start_date <= timedelta(days=30):
+                    kb = ReplyKeyboardBuilder()
+                    kb.button(text="Разместить вакансию")
+                    kb.button(text="Мои вакансии")
+                    kb.button(text="Подписка")
+                    await message.answer("✅ Подписка активна!", reply_markup=kb.as_markup(resize_keyboard=True))
+                    user_states[uid] = {"step": "employer_menu"}
+                    return
+        await message.answer("❌ Оплата не подтверждена. Свяжитесь с админом.")
     except Exception as e:
         logger.error(f"Ошибка в check_payment: {e}")
         await message.answer("❌ Ошибка. Попробуйте позже.")
